@@ -83,7 +83,9 @@ Por qué Claude no toca escenas ni settings: son YAML de Unity con IDs y GUIDs c
 3. Git + GitHub (repo privado) con `.gitignore` de Unity. Claude dicta los pasos, Lucas corre los comandos
 
 ### Semana 1 — vie 9 a jue 15: *objetos colocables*
-- Diseñar 15 niveles en papel cuadriculado, **antes de codear**. Si a partir del 10 son todos variantes del mismo, avisar
+- Niveles (cambiado 08/10, ya no se dibujan en papel): **Claude arma una base de los 15, verificada con simulación**, y Lucas los edita jugándolos (desde la semana 2 son datos que se tocan en el Inspector). Si Lucas mueve algo grande, pasa los números y Claude re-simula. Lucas diseña al menos 1 nivel propio. Si a partir del 10 son todos variantes del mismo, avisar. Guía, curva, reglas y coordenadas: `DISENO_NIVELES.md`. Decidido 08/10: **el tiro sigue libre**; cada nivel debe hacer imposible el tiro directo
+  - Base 1 a 5 (bloque Pared): **hecha** → `Diseno/niveles_1_a_5.png`
+  - Resto **por bloque, cada uno después de jugar el anterior** (lo que se aprende jugando corrige los siguientes): 6–9 Rampa y 10–12 Caja en la semana 2, cuando esos objetos existan en Unity; 13–15 Final en la semana 3
 - Arrastrar un objeto dentro de una zona permitida, snap a grilla
 - Rotación con snap de 15°
 - **Script de Lucas:** contador de intentos por nivel en pantalla
