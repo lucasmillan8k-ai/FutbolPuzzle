@@ -5,6 +5,7 @@ using UnityEngine.InputSystem;
 // Un objeto que el jugador puede arrastrar ANTES de patear (pared, y después caja y rampa).
 // - Solo se mueve dentro de la zona permitida.
 // - Se acomoda a la grilla (snap).
+// - Un toque corto (sin arrastrar) lo gira 15° en sentido horario.
 // - Si al soltarlo queda encimado con otra cosa (pared fija, pelota, arco, otro objeto), vuelve a donde estaba.
 // - Después de patear queda bloqueado hasta el próximo intento.
 // Va en el objeto colocable (necesita un Collider2D). Sin Rigidbody2D: es fijo, la pelota rebota en él.
@@ -19,9 +20,17 @@ public class ObjetoColocable : MonoBehaviour
     [Tooltip("Paso de la grilla en unidades de mundo. 0.5 = un cuadradito del papel. 0 = sin grilla")]
     [SerializeField] float tamanoGrilla = 0.5f;
 
+    [Header("Rotación")]
+    [Tooltip("Destildalo para objetos que no giran (la caja)")]
+    [SerializeField] bool puedeRotar = true;
+    [Tooltip("Cuántos grados gira con cada toque")]
+    [SerializeField] float pasoRotacion = 15f;
+
     [Header("Toque")]
     [Tooltip("Cuánto por fuera del objeto todavía cuenta como agarrarlo (la pared es finita y el dedo es grueso)")]
     [SerializeField] float margenToque = 0.3f;
+    [Tooltip("Si el dedo se mueve menos que esto entre apretar y soltar, es un toque (gira) y no un arrastre")]
+    [SerializeField] float distanciaToque = 0.25f;
 
     [Header("Colores")]
     [Tooltip("Color mientras está en un lugar donde NO se puede soltar")]
@@ -47,6 +56,8 @@ public class ObjetoColocable : MonoBehaviour
     Color colorArrastrando;
     Vector2 offsetAgarre;              // distancia entre el dedo y el centro, para que no "salte" al agarrarlo
     Vector3 posicionAntesDeArrastrar;  // a dónde vuelve si lo soltás en un lugar inválido
+    Vector2 puntoDondeSeApreto;        // para saber si fue un toque o un arrastre
+    float maximoQueSeMovioElDedo;
     readonly List<Collider2D> encimados = new List<Collider2D>();
 
     // Después de patear no se puede tocar nada hasta reintentar
@@ -87,21 +98,49 @@ public class ObjetoColocable : MonoBehaviour
             arrastrado = this;
             posicionAntesDeArrastrar = transform.position;
             offsetAgarre = (Vector2)transform.position - posMundo;
+            puntoDondeSeApreto = posMundo;
+            maximoQueSeMovioElDedo = 0f;
         }
 
         if (arrastrado != this) return;
 
-        // 2. Mover: seguir al dedo, con snap y sin salir de la zona
-        Ubicar(Limitar(posMundo + offsetAgarre));
+        maximoQueSeMovioElDedo = Mathf.Max(maximoQueSeMovioElDedo, Vector2.Distance(posMundo, puntoDondeSeApreto));
+        bool esToque = maximoQueSeMovioElDedo < distanciaToque;
+
+        // 2. Mover: seguir al dedo, con snap y sin salir de la zona (si todavía es un toque, no se mueve)
+        if (!esToque) Ubicar(Limitar(posMundo + offsetAgarre));
         bool valido = !EstaEncimado();
         if (sr != null) sr.color = valido ? colorArrastrando : colorInvalido;
 
-        // 3. Soltar: si quedó encimado, vuelve a donde estaba
+        // 3. Soltar: si fue un toque, gira. Si fue un arrastre y quedó encimado, vuelve a donde estaba
         if (puntero.press.wasReleasedThisFrame)
         {
-            if (!valido) Ubicar(posicionAntesDeArrastrar);
+            if (esToque) Girar();
+            else if (!valido) Ubicar(posicionAntesDeArrastrar);
             if (sr != null) sr.color = colorNormal;
             arrastrado = null;
+        }
+    }
+
+    // Gira un paso en sentido horario. Si después del giro no entra o queda encimado, se deshace
+    void Girar()
+    {
+        if (!puedeRotar) return;
+
+        Vector3 posicionAntes = transform.position;
+        Quaternion rotacionAntes = transform.rotation;
+
+        // Girar: en 2D se gira alrededor del eje Z. Negativo = sentido de las agujas del reloj
+        transform.Rotate(0f, 0f, -pasoRotacion);
+        Physics2D.SyncTransforms(); // para que el collider se entere del giro antes de medirlo
+
+        // Al girar cambia cuánto ocupa (una pared acostada es más ancha): reacomodarla dentro de la zona
+        Ubicar(Limitar(transform.position));
+
+        if (EstaEncimado())
+        {
+            transform.rotation = rotacionAntes;
+            Ubicar(posicionAntes);
         }
     }
 
