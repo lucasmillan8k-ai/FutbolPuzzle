@@ -61,7 +61,7 @@ public class PateoDrag : MonoBehaviour
         // Ya pateaste en este intento, o este mismo toque fue el que reinició: no se arrastra
         if (yaPateo || Time.frameCount == frameRearmado) return;
 
-        if (puntero.press.wasPressedThisFrame)
+        if (puntero.press.wasPressedThisFrame && !ObjetoColocable.HayAlgunoEn(posMundo))
         {
             inicioDrag = posMundo;
             arrastrando = true;
