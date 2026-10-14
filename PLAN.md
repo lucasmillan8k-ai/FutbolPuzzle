@@ -2,7 +2,7 @@
 
 > Este archivo es el estado del proyecto.
 > Ubicación: `C:\Proyectos\FutbolPuzzle\PLAN.md`
-> Última actualización: 08/10/2026
+> Última actualización: 14/10/2026
 
 ---
 
@@ -16,20 +16,20 @@ Este archivo **no se lee solo**: una tarea nueva no sabe que existe hasta que se
 - **Al terminar:** Lucas escribe **"cerramos"**. Ahí Claude agrega la línea del día en el **Registro diario** (qué se hizo y qué se trabó) y actualiza la fecha de "Última actualización". Si Lucas no escribe "cerramos", Claude no tiene cómo saber que la sesión terminó.
 - Claude trabaja en `Assets/`. Las carpetas `Library/`, `Temp/`, `Logs/` y `obj/` son caché de Unity: no se leen ni se tocan.
 
-### Reparto de tareas (acordado el 16/09, ajustado el 08/10 — leer siempre)
+### Reparto de tareas (acordado el 16/09, ajustado el 08/10 y el 14/10 — leer siempre)
 
 | Qué | Quién |
 |---|---|
 | Scripts `.cs` nuevos y grandes en `Assets/Scripts/` | **Claude los escribe directo en disco.** Lucas después los explica con sus palabras |
-| Cambios chicos en scripts existentes (un valor, una condición, un campo nuevo) | **Lucas.** Claude dice qué archivo y qué buscar, no el código entero |
-| 1 script chico por semana (ver cronograma) | **Lucas lo intenta primero**, Claude lo revisa |
+| Todo el código, scripts nuevos y cambios chicos (cambiado 14/10) | **Claude.** Lucas lo arma y lo prueba en Unity, y lee un bloque por día |
+| Valores para tunear (fuerza, rebote, tamaños, posiciones) | **Lucas, en el Inspector**, probando y ajustando |
 | Este `PLAN.md`, notas, archivos de datos | **Claude** |
 | Escenas `.unity`, prefabs, `.asset`, `ProjectSettings` | **Lucas, desde el editor de Unity.** Claude dicta los valores exactos |
 
 Por qué Claude no toca escenas ni settings: son YAML de Unity con IDs y GUIDs cruzados, se editan a ciegas (no puede ver el resultado) y si Unity está abierto el guardado del editor pisa el cambio. Además, armarlo en el Inspector es cómo se entiende qué hace cada componente.
 **Excepción válida:** trabajo repetitivo (ej. generar 15 niveles) → Claude escribe un script de editor en C# que lo hace desde adentro de Unity. Eso es código, no edición a ciegas.
 
-**Por qué Lucas toca código (08/10):** el objetivo no es escribir C# de memoria, es poder programar con IA. Pero Claude no ve Unity: cuando algo falla, quien tiene que entender qué hace el script y dónde mirar es Lucas. Leer, modificar y debuggear es la habilidad; escribir desde cero es solo la práctica que la entrena.
+**Por qué Lucas ya no escribe código (14/10):** esto es un hobby, y escribir scripts le quitaba las ganas de seguir. Lo que hizo fallar el sprint 1 fueron los días sin tocarlo, no el C#. El método es el del póker: hacer primero (Unity, niveles, probar ideas) y estudiar a fondo solo la parte que lo frene. **Lo que se mantiene:** la lectura diaria de un bloque. Claude no ve Unity, así que cuando algo falla el que tiene que describir bien qué pasa y dónde mirar es Lucas, y para eso alcanza con leer código, no escribirlo.
 
 **Claude no tiene consola en esta PC.** No puede correr `git`, ni abrir Unity, ni ejecutar nada acá. Todo comando lo corre Lucas y pega la salida completa si falla.
 
@@ -88,21 +88,21 @@ Por qué Claude no toca escenas ni settings: son YAML de Unity con IDs y GUIDs c
   - Resto **por bloque, cada uno después de jugar el anterior** (lo que se aprende jugando corrige los siguientes): 6–9 Rampa y 10–12 Caja en la semana 2, cuando esos objetos existan en Unity; 13–15 Final en la semana 3
 - Arrastrar un objeto dentro de una zona permitida, snap a grilla — **hecho 08/10** (`ObjetoColocable.cs`)
 - Rotación con snap de 15° — **hecho 08/10** (toque corto = gira 15° horario)
-- **Script de Lucas:** contador de intentos por nivel en pantalla
+- Contador de intentos por nivel en pantalla — **script hecho 14/10** (`ContadorIntentos.cs`, lo escribió Claude)
 - **Hito:** en un nivel podés poner una pared, rotarla y patear — **cumplido 08/10**, antes de que arranque la semana
 
 ### Semana 2 — vie 16 a jue 22: *niveles de puzzle*
-- 3 tipos de objeto como prefabs: pared, caja, rampa
+- 3 tipos de objeto como prefabs: pared, caja, rampa — **hecho 14/10** (`Assets/Prefabs/`; la rampa usa `Sprites/Rampa.png`, Polygon Collider 2D y material `RampaSuave` con rebote 0)
 - Pasar los niveles a ScriptableObjects: posición de pelota, arco, paredes fijas y qué objetos hay disponibles
 - Construir niveles 1 a 8
-- **Script de Lucas:** botón "reiniciar nivel" que vuelve los objetos a su lugar
+- Botón "reiniciar nivel" que vuelve los objetos a su lugar
 - **Hito:** 8 niveles de puzzle jugables de corrido
 
 ### Semana 3 — vie 23 a jue 29: *juego entero*
 - Niveles 9 a 15
 - Menú principal + selector de niveles (bloqueados hasta pasar el anterior)
 - Guardar progreso con `PlayerPrefs`
-- **Script de Lucas:** guardar y leer el último nivel desbloqueado
+- Guardar y leer el último nivel desbloqueado
 - **Hito:** se abre, se elige nivel, se juegan los 15, se cierra y se recuerda el progreso
 
 ### Semana 4 — vie 30/10 a jue 5/11: *que se sienta bien y publicar*
@@ -146,7 +146,7 @@ Por qué Claude no toca escenas ni settings: son YAML de Unity con IDs y GUIDs c
 - **Una tarea nueva por día o por tema.** El contexto vive en este archivo, no en el chat
 - **Un script por vez.** Nunca "hacéme el juego"
 - **Después de cada script de Claude:** explicarlo vos en 3 líneas. Si no podés, preguntá antes de seguir
-- **Cambios chicos los hacés vos.** Pedí "dónde y qué", no "el código entero"
+- **Si algo raro te da curiosidad, preguntá el porqué.** Es la forma de aprender sin tener que escribirlo
 - **Cuando rompe, pegá el error exacto.** Completo, con el número de línea
 - **Leer un bloque de código por día** (acordado 08/10): Claude elige un bloque chico del código del día y lo leen juntos línea por línea; Lucas contesta una pregunta para comprobar. Uno por día; más solo si Lucas lo pide (así hay días de avanzar rápido)
 - **No tener abierto en VS Code un script que Claude va a modificar.** Si se abrió para leer, cerrarlo sin guardar: el Ctrl+S de VS Code pisa la versión nueva (pasó el 08/10)
@@ -158,6 +158,7 @@ Por qué Claude no toca escenas ni settings: son YAML de Unity con IDs y GUIDs c
 
 | Fecha | Qué hice | Qué se trabó |
 |---|---|---|
+| 14/10 (madrugada) | Retomado tras 5 días. **Cambio de reparto:** el código lo escribe todo Claude; Lucas arma en Unity, tunea valores y lee un bloque por día (motivo: es hobby y escribir scripts le bajaba las ganas; método "póker": hacer primero, estudiar lo que frene). Claude escribió `ContadorIntentos.cs` ("Intentos: N", suma al patear, vuelve a 0 en cada nivel vía campo `Contador` nuevo en `GestorNiveles.cs`); Lucas lo armó en el Canvas (`TextoIntentos`) y anda. Lectura del día: `Update()` del contador, patrón antes/ahora — Lucas acertó que sin `pateadoAntes = pateadoAhora` sumaría en cada frame. **Semana 2 adelantada:** prefabs `ParedColocable`, `Caja` (no rota) y `Rampa` (triángulo rectángulo 2×1, sprite generado por Claude) en `Assets/Prefabs/`. Confirmado que lo del 08/10 ya estaba en GitHub; commits y push de hoy hechos por Lucas en PowerShell | La pelota rebotaba contra la rampa en vez de subir (rebote 0.8) → material `RampaSuave` (fricción 0, rebote 0, Bounce Combine Minimum) en el prefab: ahora sube bien. **Para simular los niveles 6–9: la rampa tiene rebote 0**, no 0.8. Próxima sesión (chat nuevo, Opus): niveles como ScriptableObjects + crear objetos desde los prefabs |
 | 13/10 | Sin avance | — |
 | 12/10 | Sin avance | — |
 | 11/10 | Sin avance | — |
