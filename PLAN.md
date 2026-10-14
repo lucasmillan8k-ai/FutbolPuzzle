@@ -86,10 +86,10 @@ Por qué Claude no toca escenas ni settings: son YAML de Unity con IDs y GUIDs c
 - Niveles (cambiado 08/10, ya no se dibujan en papel): **Claude arma una base de los 15, verificada con simulación**, y Lucas los edita jugándolos (desde la semana 2 son datos que se tocan en el Inspector). Si Lucas mueve algo grande, pasa los números y Claude re-simula. Lucas diseña al menos 1 nivel propio. Si a partir del 10 son todos variantes del mismo, avisar. Guía, curva, reglas y coordenadas: `DISENO_NIVELES.md`. Decidido 08/10: **el tiro sigue libre**; cada nivel debe hacer imposible el tiro directo
   - Base 1 a 5 (bloque Pared): **hecha** → `Diseno/niveles_1_a_5.png`
   - Resto **por bloque, cada uno después de jugar el anterior** (lo que se aprende jugando corrige los siguientes): 6–9 Rampa y 10–12 Caja en la semana 2, cuando esos objetos existan en Unity; 13–15 Final en la semana 3
-- Arrastrar un objeto dentro de una zona permitida, snap a grilla
-- Rotación con snap de 15°
+- Arrastrar un objeto dentro de una zona permitida, snap a grilla — **hecho 08/10** (`ObjetoColocable.cs`)
+- Rotación con snap de 15° — **hecho 08/10** (toque corto = gira 15° horario)
 - **Script de Lucas:** contador de intentos por nivel en pantalla
-- **Hito:** en un nivel podés poner una pared, rotarla y patear
+- **Hito:** en un nivel podés poner una pared, rotarla y patear — **cumplido 08/10**, antes de que arranque la semana
 
 ### Semana 2 — vie 16 a jue 22: *niveles de puzzle*
 - 3 tipos de objeto como prefabs: pared, caja, rampa
@@ -148,6 +148,8 @@ Por qué Claude no toca escenas ni settings: son YAML de Unity con IDs y GUIDs c
 - **Después de cada script de Claude:** explicarlo vos en 3 líneas. Si no podés, preguntá antes de seguir
 - **Cambios chicos los hacés vos.** Pedí "dónde y qué", no "el código entero"
 - **Cuando rompe, pegá el error exacto.** Completo, con el número de línea
+- **Leer un bloque de código por día** (acordado 08/10): Claude elige un bloque chico del código del día y lo leen juntos línea por línea; Lucas contesta una pregunta para comprobar. Uno por día; más solo si Lucas lo pide (así hay días de avanzar rápido)
+- **No tener abierto en VS Code un script que Claude va a modificar.** Si se abrió para leer, cerrarlo sin guardar: el Ctrl+S de VS Code pisa la versión nueva (pasó el 08/10)
 - **Dudas conceptuales y de volumen** → ChatGPT Go. **Código, archivos y decisiones del proyecto** → Claude con `C:\Proyectos\` conectada
 
 ---
@@ -156,6 +158,12 @@ Por qué Claude no toca escenas ni settings: son YAML de Unity con IDs y GUIDs c
 
 | Fecha | Qué hice | Qué se trabó |
 |---|---|---|
+| 13/10 | Sin avance | — |
+| 12/10 | Sin avance | — |
+| 11/10 | Sin avance | — |
+| 10/10 | Sin avance | — |
+| 09/10 | Sin avance (ningún archivo del proyecto modificado después de la sesión de la noche del 08) | Segundo corte largo: 5 días seguidos sin tocarlo, justo después del mejor día del proyecto |
+| 08/10 (noche) | **Semana 1 adelantada: hito cumplido.** Claude escribió `ObjetoColocable.cs`: arrastrar dentro de la zona permitida con snap a grilla 0.5, toque corto = gira 15°, si queda encimado vuelve atrás (al girar contra el borde de la zona se reacomoda adentro; contra una pared del nivel el giro se cancela), bloqueado después de patear. **Lucas escribió su primera línea de C#** en `PateoDrag.cs` (`&& !ObjetoColocable.HayAlgunoEn(posMundo)` para que tocar la pared no patee) y probó sacar el `!` para ver qué rompía. En Unity armó `ZonaPermitida`, `ParedColocable` y agregó **Global Light 2D**. Primera lectura guiada de código (bloque "agarrar": `if`, `&&`, `==` vs `=`, `null`, `this`). Acordado: leer un bloque de código por día | Todo se veía negro por el material `Sprite-Lit-Default` sin luz en la escena → resuelto con Global Light 2D (de paso arregla el GOL negro). La rotación "no andaba": VS Code tenía abierta la versión vieja del script y al guardar pisó la nueva → reescrita. Lucas: sin el código comentado le cuesta leer C#; se encara con la lectura diaria. Pendiente: confirmar commit + push de hoy |
 | 08/10 | Cierre del sprint 1: la fecha del 7/10 no se cumplió (6 y 7 sin avance; quedaron los 5 niveles de `GestorNiveles.cs`). Decidido: terminar el juego completo antes de otro proyecto, para aprender bien Unity; el próximo puede ser con otro motor. Nueva meta v1.0 al 05/11 con lista cerrada (objetos colocables, 15 niveles, menú + selector + guardado, feel, WebGL + APK). Plan reescrito. Reparto ajustado: Lucas hace los cambios chicos y 1 script chico por semana. **v0.1 pública en itch** (se verificó que la build del 05/10 ya tenía los 5 niveles; página con título, descripción y captura, embed 540×960). **Git + GitHub armados:** Git 2.55 instalado con winget, `.gitignore` de Unity (lo escribió Claude; deja afuera `Library/`, `Builds/`, `Logs/`, `UserSettings/`, archivos de VS Code), primer commit y push a `github.com/lucasmillan8k-ai/FutbolPuzzle` (privado, rama `main`). Las 3 tareas del día cumplidas. **Tarde, diseño de niveles:** decidido que el tiro sigue libre y que cada nivel debe hacer imposible el tiro directo. Claude escribió `DISENO_NIVELES.md` (reglas, objetos propuestos, curva de los 15) y armó con una simulación de la física de la escena la base del bloque Pared, niveles 1 a 5 (`Diseno/niveles_1_a_5.png`, coordenadas en el .md). Hallazgo: con fricción 0, esconder el arco no alcanza; lo que funciona es controlar por dónde sale la pelota (túnel = rasante, chimenea = para arriba). Cambiado el método: no se dibuja en papel; Claude arma la base por bloque, cada bloque después de jugar el anterior, y Lucas ajusta jugando de a un nivel (y diseña al menos 1 propio). Próxima sesión: semana 1, arrastrar la pared en la zona permitida con snap a grilla | Probado ChatGPT para diseñar niveles: geometría incoherente (pelota que no entra en el pozo, dibujo y coordenadas que no coinciden). Para niveles, Claude + simulación. Nivel 4 flojo (66 de 14.040 tiros entran sin pared) y nivel 5 muy difícil: ajustar al jugarlos. Pendiente Lucas: commit + push de `DISENO_NIVELES.md` y la carpeta `Diseno/` |
 | 05/10 | Build WebGL subida a itch.io y andando (lo hizo Lucas). Charla de diseño: hoy el juego es de puntería, no puzzle; la parte puzzle (colocar/rotar objetos) quedó recortada y va post-sprint. Para el 7/10 el "puzzle" lo dan los niveles: obstáculos que obligan a globear, rodear o picar en la pared. Claude escribió `GestorNiveles.cs` (5 niveles como datos en una sola escena, paredes generadas por código, pasa solo al siguiente tras el gol) y modificó `GolDetector.cs` (evento `AlHacerGol`, `HuboGol`), `ReintentarTap.cs` (`FijarPosicionInicial`, sin retry durante el gol), `PateoDrag.cs` (expone `FuerzaPorUnidad`) y `TrayectoriaLinea.cs` (dibuja la curva con gravedad, no una recta). Niveles verificados con una simulación aproximada (gravedad 1, rebote 0.8, fricción 0, rotación congelada, fuerza 5, distancia máx 4) | Pendiente Lucas en Unity: ajustar física a esos valores, crear `Niveles` con `GestorNiveles`, probar los 5 niveles, nueva build y resubir |
 | 04/10 | Retomado tras 2 semanas parado. Recorte del plan. Verificado que el 19/09 también quedaron hechos `TrayectoriaLinea.cs` y `GolDetector.cs` + `Arco`. Arreglado el texto "GOL" que no se veía (caja 160×30 con fuente 120 → 900×250, overflow, Canvas Scaler 1080×1920). Claude escribió `ReintentarTap.cs` y modificó `PateoDrag.cs` (un pateo por intento) y `GolDetector.cs` (`OcultarGol`). Probado: patear → gol → tap → reinicia, OK | 20/09–03/10 sin trabajar. El texto GOL quedó negro (pendiente cambiar color) |
@@ -174,6 +182,8 @@ Por qué Claude no toca escenas ni settings: son YAML de Unity con IDs y GUIDs c
 - Carrera: potrero → inferiores → segunda → primera → internacional
 - Play Store con closed testing
 - Arte definitivo
+- Parpadeo rojo cuando un giro se cancela por quedar encimado (hoy no hace nada y parece que no tocaste bien) — si sobra tiempo en semana 4
+- Girar para el otro lado (hoy solo horario: −15° son 11 toques)
 
 ---
 

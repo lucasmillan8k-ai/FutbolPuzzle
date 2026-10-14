@@ -43,6 +43,8 @@ public class GestorNiveles : MonoBehaviour
     [SerializeField] GolDetector arco;
     [Tooltip("Opcional: un Text de la UI para mostrar 'Nivel 2/5'")]
     [SerializeField] Text textoNivel;
+    [Tooltip("Opcional: el contador de intentos, para ponerlo en 0 al cambiar de nivel")]
+    [SerializeField] ContadorIntentos contador;
 
     [Header("Ajustes")]
     [Tooltip("Segundos entre el gol y el nivel siguiente")]
@@ -138,6 +140,9 @@ public class GestorNiveles : MonoBehaviour
         pelota.Reiniciar();
 
         if (textoNivel != null) textoNivel.text = $"Nivel {indice + 1}/{niveles.Count}";
+
+        // 5. Nivel nuevo, intentos en 0
+        if (contador != null) contador.Reiniciar();
     }
 
     void CrearPared(Pared p)
