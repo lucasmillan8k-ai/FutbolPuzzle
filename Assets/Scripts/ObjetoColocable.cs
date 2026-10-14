@@ -63,6 +63,13 @@ public class ObjetoColocable : MonoBehaviour
     // Después de patear no se puede tocar nada hasta reintentar
     bool Bloqueado => pateo != null && pateo.YaPateo;
 
+    // La llama GestorNiveles justo después de crear el objeto desde el prefab:
+    // un prefab no puede traer guardada la zona (es un objeto de la escena), así que se la pasamos por código
+    public void Configurar(SpriteRenderer zona)
+    {
+        zonaPermitida = zona;
+    }
+
     void Awake()
     {
         col = GetComponent<Collider2D>();
@@ -122,26 +129,44 @@ public class ObjetoColocable : MonoBehaviour
         }
     }
 
-    // Gira un paso en sentido horario. Si después del giro no entra o queda encimado, se deshace
+    // Gira en sentido horario hasta el próximo ángulo que entre en la zona sin quedar encimado.
+    // Ej.: en una zona baja la pared no entra parada; en vez de trabarse, se saltea esos ángulos.
+    // Si no entra en ningún ángulo, queda como estaba.
     void Girar()
     {
-        if (!puedeRotar) return;
+        if (!puedeRotar || pasoRotacion <= 0f) return;
 
         Vector3 posicionAntes = transform.position;
         Quaternion rotacionAntes = transform.rotation;
+        int pasosParaVueltaEntera = Mathf.RoundToInt(360f / pasoRotacion);
 
-        // Girar: en 2D se gira alrededor del eje Z. Negativo = sentido de las agujas del reloj
-        transform.Rotate(0f, 0f, -pasoRotacion);
-        Physics2D.SyncTransforms(); // para que el collider se entere del giro antes de medirlo
-
-        // Al girar cambia cuánto ocupa (una pared acostada es más ancha): reacomodarla dentro de la zona
-        Ubicar(Limitar(transform.position));
-
-        if (EstaEncimado())
+        for (int i = 1; i < pasosParaVueltaEntera; i++)
         {
-            transform.rotation = rotacionAntes;
-            Ubicar(posicionAntes);
+            // Probar el ángulo i pasos más adelante, partiendo siempre del lugar original
+            transform.rotation = rotacionAntes * Quaternion.Euler(0f, 0f, -pasoRotacion * i);
+            transform.position = posicionAntes;
+            Physics2D.SyncTransforms(); // para que el collider se entere del giro antes de medirlo
+
+            // Al girar cambia cuánto ocupa (una pared acostada es más ancha): reacomodarla dentro de la zona
+            Ubicar(Limitar(posicionAntes));
+
+            if (EntraEnZona() && !EstaEncimado()) return; // este ángulo sirve
         }
+
+        // Ningún ángulo sirvió: volver a como estaba
+        transform.rotation = rotacionAntes;
+        Ubicar(posicionAntes);
+    }
+
+    // true si el objeto entero queda adentro de la zona permitida (con un margen chiquito por redondeo)
+    bool EntraEnZona()
+    {
+        if (zonaPermitida == null) return true;
+        Bounds zona = zonaPermitida.bounds;
+        Bounds b = col.bounds;
+        const float margen = 0.01f;
+        return b.min.x >= zona.min.x - margen && b.max.x <= zona.max.x + margen
+            && b.min.y >= zona.min.y - margen && b.max.y <= zona.max.y + margen;
     }
 
     bool PuedeAgarrarse(Vector2 punto)

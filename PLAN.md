@@ -2,7 +2,7 @@
 
 > Este archivo es el estado del proyecto.
 > Ubicación: `C:\Proyectos\FutbolPuzzle\PLAN.md`
-> Última actualización: 14/10/2026
+> Última actualización: 14/10/2026 (2ª sesión, 04:50)
 
 ---
 
@@ -93,7 +93,8 @@ Por qué Claude no toca escenas ni settings: son YAML de Unity con IDs y GUIDs c
 
 ### Semana 2 — vie 16 a jue 22: *niveles de puzzle*
 - 3 tipos de objeto como prefabs: pared, caja, rampa — **hecho 14/10** (`Assets/Prefabs/`; la rampa usa `Sprites/Rampa.png`, Polygon Collider 2D y material `RampaSuave` con rebote 0)
-- Pasar los niveles a ScriptableObjects: posición de pelota, arco, paredes fijas y qué objetos hay disponibles
+- Pasar los niveles a ScriptableObjects: posición de pelota, arco, paredes fijas y qué objetos hay disponibles — **hecho 14/10** (`DatosNivel.cs`, assets en `Assets/Niveles/`, se crean con el menú FutbolPuzzle → Crear niveles 1 a 5)
+- **Antes de la rampa (decidido 14/10): rediseñar los 5 niveles de pared** hasta que la mecánica se sienta limpia. Criterio: sin colocar nada, 0 goles; con la pared bien puesta entra un tiro obvio y un % alto de tiros; "casi bien" entra menos. Cambios a probar en simulación: pared con collider de cápsula (hoy la pelota choca contra la punta), rebote 1.0 en las paredes colocables y menos en las fijas, túneles que fijan la dirección (que se elija la potencia, no el ángulo)
 - Construir niveles 1 a 8
 - Botón "reiniciar nivel" que vuelve los objetos a su lugar
 - **Hito:** 8 niveles de puzzle jugables de corrido

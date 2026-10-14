@@ -90,6 +90,22 @@ Un objeto nuevo por bloque, primero solo y después combinado. Los primeros de c
 
 ---
 
+## Niveles 1 a 5 — ya son datos (14/10)
+
+Los crea el menú **FutbolPuzzle > Crear niveles 1 a 5** (`Assets/Editor/CrearNiveles.cs`) en `Assets/Niveles/Nivel01..05`. Las coordenadas salen de `Diseno/niveles_1_a_5.png` y desde ahí se tocan en el Inspector.
+
+Re-simulado el 14/10 con la geometría reconstruida (pared 0.5×3, rebote 0.8, fricción 0). Tiro directo sin colocar nada, de 14.040: 0 / 10 / 17 / 75 / 0 (el 08/10 dieron 1 / 12 / 20 / 66 / 0: la reconstrucción coincide). Mejores soluciones (tiros que entran, de 3.600; rotación como la deja el toque):
+
+| # | Pared(es) | Entran | Nota |
+|---|---|---|---|
+| 1 | (2, −6.5) a −45° | 324 | Arranca en "\\" (−135°): 6 toques |
+| 2 | (−4.125, 3) a −45° | 42 | Sale del centro de la zona (2.25 de ancho, fuera de grilla). Vertical también mete algunos (3–10): el "girala" es suave |
+| 3 | (−1.5, −6.5) a −135° | 175 | — |
+| 4 | (4, 8.5) a −135° | 31 | **Flojo:** sin pared ya entran ~19 de 3.600. Corregir al jugarlo |
+| 5 | (0.5, 4.5) a −30° + (1.5, −6.5) a −45° | 8 | El más difícil, como estaba previsto |
+
+---
+
 ## Orden de trabajo
 
 1. Dibujar 1 a 5 → mandar foto → Claude verifica la regla de oro → ajustar

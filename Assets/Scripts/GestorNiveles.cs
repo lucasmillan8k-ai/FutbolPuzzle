@@ -3,80 +3,37 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-// Sistema de niveles: UNA sola escena, los niveles son datos (una lista).
-// Cada nivel dice dónde arranca la pelota, dónde está el arco y qué paredes hay.
+// Sistema de niveles: UNA sola escena. Cada nivel es un asset DatosNivel (Assets/Niveles/).
+// Al cargar un nivel: pone pelota y arco, crea las paredes fijas, mueve la zona permitida
+// y crea los objetos colocables desde sus prefabs.
 // Al hacer gol, espera un momento y carga el siguiente. Después del último, vuelve al 1.
 // Va en un GameObject vacío llamado "Niveles".
 public class GestorNiveles : MonoBehaviour
 {
-    // Una pared/obstáculo: centro, tamaño y rotación (en grados), en unidades de mundo
-    [System.Serializable]
-    public class Pared
-    {
-        public Vector2 centro;
-        public Vector2 tamano = Vector2.one;
-        public float rotacion;
-
-        public Pared() { }
-
-        public Pared(float x, float y, float ancho, float alto, float rot = 0f)
-        {
-            centro = new Vector2(x, y);
-            tamano = new Vector2(ancho, alto);
-            rotacion = rot;
-        }
-    }
-
-    [System.Serializable]
-    public class Nivel
-    {
-        public string nombre;
-        public Vector2 pelota;
-        public Vector2 arco;
-        [Tooltip("Ancho del arco en unidades de mundo (el alto no cambia)")]
-        public float anchoArco = 3f;
-        public List<Pared> paredes = new List<Pared>();
-    }
-
     [Header("Referencias (arrastralas desde la Hierarchy)")]
     [SerializeField] ReintentarTap pelota;
     [SerializeField] GolDetector arco;
+    [Tooltip("El sprite ZonaPermitida de la escena. Se mueve y se agranda según cada nivel")]
+    [SerializeField] SpriteRenderer zonaPermitida;
     [Tooltip("Opcional: un Text de la UI para mostrar 'Nivel 2/5'")]
     [SerializeField] Text textoNivel;
     [Tooltip("Opcional: el contador de intentos, para ponerlo en 0 al cambiar de nivel")]
     [SerializeField] ContadorIntentos contador;
 
+    [Header("Niveles (arrastrá los assets de Assets/Niveles, en orden)")]
+    [SerializeField] List<DatosNivel> niveles = new List<DatosNivel>();
+
     [Header("Ajustes")]
     [Tooltip("Segundos entre el gol y el nivel siguiente")]
     [SerializeField] float esperaTrasGol = 1.5f;
-    [Tooltip("Color de las paredes de cada nivel")]
+    [Tooltip("Color de las paredes fijas")]
     [SerializeField] Color colorParedes = new Color(0.55f, 0.6f, 0.7f);
     [Tooltip("Para probar: en qué nivel arranca el juego (0 = el primero)")]
     [SerializeField] int nivelInicial = 0;
 
-    // Los 5 niveles. Coordenadas pensadas para la escena actual:
-    // cámara ortográfica tamaño 10, paredes laterales en x = ±5.5, piso en y = -8.
-    // La pelota apoyada en el piso está en y = -7.25.
-    [Header("Niveles")]
-    [SerializeField] List<Nivel> niveles = new List<Nivel>
-    {
-        new Nivel { nombre = "Directo", pelota = new Vector2(0f, -7.25f), arco = new Vector2(0f, 6f), anchoArco = 3f },
-
-        new Nivel { nombre = "Globito", pelota = new Vector2(-3f, -7.25f), arco = new Vector2(3.2f, -7f), anchoArco = 3f,
-            paredes = { new Pared(0.5f, -4f, 0.5f, 7.5f) } },
-
-        new Nivel { nombre = "Bajo techo", pelota = new Vector2(3.5f, -7.25f), arco = new Vector2(-3.75f, -7f), anchoArco = 2.5f,
-            paredes = { new Pared(-2.5f, -4.5f, 5.5f, 0.5f), new Pared(-0.5f, -6.75f, 0.5f, 1.5f) } },
-
-        new Nivel { nombre = "Por el hueco", pelota = new Vector2(2f, -7.25f), arco = new Vector2(-3.5f, 4f), anchoArco = 3f,
-            paredes = { new Pared(1.625f, 0f, 7.25f, 0.5f) } },
-
-        new Nivel { nombre = "Banda", pelota = new Vector2(-3.5f, -7.25f), arco = new Vector2(-4f, 4f), anchoArco = 2f,
-            paredes = { new Pared(-1.75f, 1.5f, 6.5f, 0.5f), new Pared(-4.75f, 2.75f, 0.5f, 2f) } },
-    };
-
     int nivelActual;
     Transform contenedorParedes;
+    Transform contenedorObjetos;
     Sprite spriteCuadrado;
     Vector3 escalaBaseArco;
     float anchoBaseArco;
@@ -94,7 +51,9 @@ public class GestorNiveles : MonoBehaviour
         escalaBaseArco = arco.transform.localScale;
         anchoBaseArco = arco.GetComponent<BoxCollider2D>().size.x * escalaBaseArco.x;
 
+        // Dos "carpetas" vacías en la Hierarchy: lo que se crea en cada nivel va adentro
         contenedorParedes = new GameObject("ParedesDelNivel").transform;
+        contenedorObjetos = new GameObject("ObjetosDelNivel").transform;
     }
 
     void OnEnable()  { if (arco != null) arco.AlHacerGol += CuandoHayGol; }
@@ -102,6 +61,11 @@ public class GestorNiveles : MonoBehaviour
 
     void Start()
     {
+        if (niveles.Count == 0)
+        {
+            Debug.LogError("GestorNiveles: la lista de niveles está vacía. Arrastrá los assets de Assets/Niveles.");
+            return;
+        }
         CargarNivel(Mathf.Clamp(nivelInicial, 0, niveles.Count - 1));
     }
 
@@ -121,31 +85,50 @@ public class GestorNiveles : MonoBehaviour
     public void CargarNivel(int indice)
     {
         nivelActual = indice;
-        Nivel n = niveles[indice];
+        DatosNivel n = niveles[indice];
 
-        // 1. Borrar las paredes del nivel anterior
-        for (int i = contenedorParedes.childCount - 1; i >= 0; i--)
-            Destroy(contenedorParedes.GetChild(i).gameObject);
+        // 1. Borrar lo del nivel anterior (paredes fijas y objetos colocables)
+        Vaciar(contenedorParedes);
+        Vaciar(contenedorObjetos);
 
-        // 2. Crear las paredes de este nivel
-        foreach (Pared p in n.paredes) CrearPared(p);
+        // 2. Paredes fijas de este nivel
+        foreach (ParedFija p in n.paredes) CrearPared(p);
 
-        // 3. Mover el arco y ajustar su ancho
+        // 3. Arco: lugar y ancho
         arco.transform.position = new Vector3(n.arco.x, n.arco.y, arco.transform.position.z);
         float factor = n.anchoArco / anchoBaseArco;
         arco.transform.localScale = new Vector3(escalaBaseArco.x * factor, escalaBaseArco.y, escalaBaseArco.z);
 
-        // 4. Poner la pelota en su lugar y dejar todo listo para patear
+        // 4. Zona permitida: el sprite mide 1x1, así que la escala ES el tamaño
+        zonaPermitida.transform.position = new Vector3(n.zonaCentro.x, n.zonaCentro.y, zonaPermitida.transform.position.z);
+        zonaPermitida.transform.localScale = new Vector3(n.zonaTamano.x, n.zonaTamano.y, 1f);
+
+        // 5. Objetos colocables, cada uno desde su prefab
+        foreach (ObjetoDelNivel o in n.objetos) CrearObjeto(o);
+
+        // 6. Pelota en su lugar y lista para patear
         pelota.FijarPosicionInicial(n.pelota);
         pelota.Reiniciar();
 
         if (textoNivel != null) textoNivel.text = $"Nivel {indice + 1}/{niveles.Count}";
 
-        // 5. Nivel nuevo, intentos en 0
+        // 7. Nivel nuevo, intentos en 0
         if (contador != null) contador.Reiniciar();
     }
 
-    void CrearPared(Pared p)
+    void Vaciar(Transform contenedor)
+    {
+        for (int i = contenedor.childCount - 1; i >= 0; i--)
+        {
+            GameObject hijo = contenedor.GetChild(i).gameObject;
+            // Destroy recién lo borra al final del frame: lo apagamos ya para que
+            // no estorbe al chequear encimados de los objetos nuevos
+            hijo.SetActive(false);
+            Destroy(hijo);
+        }
+    }
+
+    void CrearPared(ParedFija p)
     {
         GameObject go = new GameObject("Pared");
         go.transform.SetParent(contenedorParedes);
@@ -159,5 +142,24 @@ public class GestorNiveles : MonoBehaviour
 
         // Sin Rigidbody2D: es una pared fija. El collider toma el tamaño del sprite (1x1) y la escala lo agranda
         go.AddComponent<BoxCollider2D>();
+    }
+
+    void CrearObjeto(ObjetoDelNivel o)
+    {
+        if (o.prefab == null)
+        {
+            Debug.LogWarning("GestorNiveles: hay un objeto del nivel sin prefab asignado.");
+            return;
+        }
+
+        // Instantiate = crear una copia del prefab en la escena, en esa posición y rotación
+        ObjetoColocable nuevo = Instantiate(
+            o.prefab,
+            new Vector3(o.posicion.x, o.posicion.y, 0f),
+            Quaternion.Euler(0f, 0f, o.rotacion),
+            contenedorObjetos);
+
+        // El prefab no puede guardar referencias a cosas de la escena: la zona se la pasamos acá
+        nuevo.Configurar(zonaPermitida);
     }
 }
