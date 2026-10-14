@@ -10,8 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 2060948787425993556}
   - component: {fileID: 5674152520521500440}
-  - component: {fileID: 6370492907529144086}
   - component: {fileID: 3923689190339904982}
+  - component: {fileID: 7361920006082895229}
   m_Layer: 0
   m_Name: Rampa
   m_TagString: Untagged
@@ -93,8 +93,27 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
---- !u!61 &6370492907529144086
-BoxCollider2D:
+--- !u!114 &3923689190339904982
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4029011336201430252}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 57992489b06553745a2083ea7c7f5430, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ObjetoColocable
+  zonaPermitida: {fileID: 0}
+  tamanoGrilla: 0.5
+  puedeRotar: 1
+  pasoRotacion: 15
+  margenToque: 0.3
+  distanciaToque: 0.25
+  colorInvalido: {r: 1, g: 0.35, b: 0.35, a: 1}
+--- !u!60 &7361920006082895229
+PolygonCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -103,7 +122,7 @@ BoxCollider2D:
   m_Enabled: 1
   serializedVersion: 3
   m_Density: 1
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: 828b5dbcbaef3f94bb9f5dcf261293c0, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -137,24 +156,11 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 1}
-  m_EdgeRadius: 0
---- !u!114 &3923689190339904982
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4029011336201430252}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 57992489b06553745a2083ea7c7f5430, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ObjetoColocable
-  zonaPermitida: {fileID: 0}
-  tamanoGrilla: 0.5
-  puedeRotar: 1
-  pasoRotacion: 15
-  margenToque: 0.3
-  distanciaToque: 0.25
-  colorInvalido: {r: 1, g: 0.35, b: 0.35, a: 1}
+  m_Points:
+    m_Paths:
+    - - {x: 0.96, y: 0.5}
+      - {x: -1, y: -0.48}
+      - {x: -1, y: -0.5}
+      - {x: 1, y: -0.5}
+      - {x: 1, y: 0.5}
+  m_UseDelaunayMesh: 1
